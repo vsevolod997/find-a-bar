@@ -35,58 +35,25 @@ class ViewController: UIViewController {
         
         guard let location =  locationManager.location?.coordinate else { return }
         
-        BarSearcherService.getMyBar(userPosition: location) { (error, resBars) in
+        BarSearcherService.getMyBar(userPosition: location) { (error, resBars, length) in
             if let err = error{
-                
+                self.errorController(erro: err.rawValue)
             }else {
-                guard let bars = resBars else { return  }
-                
+                guard let bars = resBars, let lng = length else { return }
+                print(bars, Int(lng))
             }
         }
         
     }
     
-    func save(){
-       if CLLocationManager.locationServicesEnabled() {
-            locationManager.requestAlwaysAuthorization()
-            locationManager.requestWhenInUseAuthorization()
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyBest
-            locationManager.startUpdatingLocation()
-        }
+    private func errorController(erro: String){
+        let alert = UIAlertController(title: "Внимание", message: erro, preferredStyle: .alert)
+        let alertAction = UIAlertAction(title: "OK", style: .destructive, handler: nil)
+        alert.addAction(alertAction)
         
-        guard let location =  locationManager.location?.coordinate else { return }
-        
-        let stringGoogleQuery  = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=\(location.latitude),\(location.longitude)&radius=1500&type=bar&fields=formatted_address,name,rating,opening_hours,geometry&key=AIzaSyBr9HIxx4wEfhUs5VTidBNfOMCELlHBALA"
-        guard let sstringGoogle =  stringGoogleQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return }
-        
-        guard let urlGoogleQuery = URL(string: sstringGoogle) else {return}
-        var urlReqest = URLRequest(url: urlGoogleQuery)
-        urlReqest.httpMethod = "GET"
-        let task = URLSession.shared.dataTask(with: urlReqest) { (data, response, error) in
-            if error == nil{
-                let json = try? JSONSerialization.jsonObject(with: data!, options: .mutableContainers)
-                print(json)
-                if let dict = json as? Dictionary<String, AnyObject>{
-                    if let result = dict["results"] as? [Dictionary<String,AnyObject>]{
-                        for place in result{
-                            print(place["name"])
-                            if let location = place["geometry"] as? Dictionary<String, AnyObject>{
-                                print(location["location"])
-                            }
-                            print(place["vicinity"])
-                            print(place["rating"])
-                            print(place["place_id"])
-                            print("------------------- ")
-                        }
-                    }
-                }
-            } else {
-                print(error)
-            }
-        }
-        task.resume()
+        present(alert, animated: true, completion: nil)
     }
+    
 }
 
 

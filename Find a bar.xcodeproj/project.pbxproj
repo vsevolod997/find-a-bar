@@ -70,12 +70,12 @@
 				4221DB2F2386827F00EEE859 /* AppDelegate.swift */,
 				4221DB312386827F00EEE859 /* SceneDelegate.swift */,
 				4221DB332386827F00EEE859 /* ViewController.swift */,
+				424AAEE22388518A00D07EBE /* BarSearcherService.swift */,
 				4221DB352386827F00EEE859 /* Main.storyboard */,
 				4221DB382386828000EEE859 /* Assets.xcassets */,
 				4221DB3A2386828000EEE859 /* LaunchScreen.storyboard */,
 				4221DB3D2386828000EEE859 /* Info.plist */,
 				424AAEE02388506F00D07EBE /* Bar.swift */,
-				424AAEE22388518A00D07EBE /* BarSearcherService.swift */,
 			);
 			path = "Find a bar";
 			sourceTree = "<group>";

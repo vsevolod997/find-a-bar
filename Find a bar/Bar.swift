@@ -7,13 +7,21 @@
 //
 
 import Foundation
+import CoreLocation
 
 struct Bar{
     
     var id: String
     var name: String
-    var latitude: Double
-    var longitude: Double
+    var location: CLLocationCoordinate2D
     var adress: String
     var reit: Double
+    
+    init(id: String, name: String, latitude:Double, longitude:Double, adress: String, reit: Double) {
+        self.id = id
+        self.name = name
+        self.adress = adress
+        self.location = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        self.reit = reit
+    }
 }

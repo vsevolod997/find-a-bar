@@ -12,36 +12,52 @@ import CoreLocation
 enum ErrorSearch: String {
     case notFound = "Нет баров в шаговой доступности =("
     case queryData = "Произошла ошибка в ходе выполнения запроса"
+    case errorData = "Получены некорректные данные"
 }
 
 class BarSearcherService {
     
     //MARK: - Поиск ближайшего бара по координатам пользователя
-    class func getMyBar(userPosition: CLLocationCoordinate2D, complition: @escaping (ErrorSearch?, Bar?) -> Void){
-        //if let allBar = getAllBar(userPosition){
-            
-        //}else{
-           // complition(.notFound, nil)
-       // }
+    class func getMyBar(userPosition: CLLocationCoordinate2D, complition: @escaping (ErrorSearch?, Bar?, Double?) -> Void){
+        
         getAllBar(userPosition: userPosition) { (error, res) in
             if let err = error{
-                
+                complition(err, nil, nil)
             } else {
+                var minLength: Double = Double(INT_MAX)
+                var myBar: Bar!
                 guard let bars = res else { return }
-                for bar in bars{
-                    print(bar)
+                if bars.count == 0 {
+                    complition(.notFound, nil, nil)
+                } else {
+                    for bar in bars{
+                        let length = distanceBetweenPoint(point1: userPosition, point2: bar.location)
+                        print(length)
+                        if length < minLength{
+                            minLength = length
+                            myBar = bar
+                        }
+                    }
+                    complition(nil, myBar, minLength)
                 }
             }
         }
         
     }
     
+    //MARK: - Расстояние между точками
+    class func distanceBetweenPoint(point1: CLLocationCoordinate2D, point2: CLLocationCoordinate2D) -> Double{
+        let p1 = CLLocation(latitude: point1.latitude, longitude: point1.longitude)
+        let p2 = CLLocation(latitude: point2.latitude, longitude: point2.longitude)
+        
+        return p1.distance(from: p2)
+    }
     
-    
+    //MARK: - Все бары в радиусе 1500м (поиск по категории заведения)
     private static func getAllBar(userPosition: CLLocationCoordinate2D, complition: @escaping(ErrorSearch?, [Bar]?)->Void) {
         var allBar: [Bar] = []
-        
-        let stringGoogleQuery  = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=\(userPosition.latitude),\(userPosition.longitude)&radius=1500&type=bar&fields=formatted_address,name,rating,opening_hours,geometry&key=AIzaSyBr9HIxx4wEfhUs5VTidBNfOMCELlHBALA"
+        let radius = 1500
+        let stringGoogleQuery  = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=\(userPosition.latitude),\(userPosition.longitude)&radius=\(radius)&type=bar&fields=formatted_address,name,rating,opening_hours,geometry&key=AIzaSyBr9HIxx4wEfhUs5VTidBNfOMCELlHBALA"
         guard let sstringGoogle =  stringGoogleQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return }
         
         guard let urlGoogleQuery = URL(string: sstringGoogle) else { return }
@@ -50,19 +66,14 @@ class BarSearcherService {
         let task = URLSession.shared.dataTask(with: urlReqest) { (data, response, error) in
             if error == nil{
                 let json = try? JSONSerialization.jsonObject(with: data!, options: .mutableContainers)
-                //print(json)
                 if let dict = json as? Dictionary<String, AnyObject>{
                     if let result = dict["results"] as? [Dictionary<String,AnyObject>]{
                         for place in result{
                             guard let name = place["name"] else { return }
                             var latitude: Double = 0.0
                             var longitude: Double = 0.0
-                           // print(place["name"])
                             if let location = place["geometry"] as? Dictionary<String, AnyObject>{
-                               // print(location["location"])
                                 if let coordinate = location["location"] as? Dictionary<String, Double> {
-                                 //   print(coordinate["lat"])
-                                 //   print(coordinate["lng"])
                                     guard let lat = coordinate["lat"] else { return }
                                     guard let lng = coordinate["lng"] else { return }
                                     latitude = lat
@@ -72,15 +83,12 @@ class BarSearcherService {
                             guard let vicinity = place["vicinity"] else { return }
                             guard let rating = place["rating"] else { return }
                             guard let id = place["place_id"] else { return }
-                           // print(place["vicinity"])
-                           // print(place["rating"])
-                           // print(place["place_id"])
-                            let newBar = Bar(id:id as! String, name: name as! String, latitude: latitude, longitude: longitude, adress: vicinity as! String, reit: rating as! Double)
+                            let newBar = Bar(id: id as! String, name: name as! String, latitude: latitude, longitude: longitude, adress: vicinity as! String, reit: rating as! Double)
                             allBar.append(newBar)
-                           // print(newBar)
-                           // print("------------------- ")
                         }
                         complition(nil, allBar)
+                    } else {
+                        complition(.errorData, nil)
                     }
                 }
             } else {
