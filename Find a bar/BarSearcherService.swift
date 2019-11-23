@@ -19,7 +19,7 @@ class BarSearcherService {
     
     //MARK: - Поиск ближайшего бара по координатам пользователя
     class func getMyBar(userPosition: CLLocationCoordinate2D, complition: @escaping (ErrorSearch?, Bar?, Double?) -> Void){
-        
+        print(Thread.current)
         getAllBar(userPosition: userPosition) { (error, res) in
             if let err = error{
                 complition(err, nil, nil)
@@ -32,10 +32,10 @@ class BarSearcherService {
                 } else {
                     for bar in bars{
                         let length = distanceBetweenPoint(point1: userPosition, point2: bar.location)
-                        print(length)
                         if length < minLength{
                             minLength = length
                             myBar = bar
+                             print(Thread.current)
                         }
                     }
                     complition(nil, myBar, minLength)
@@ -66,6 +66,7 @@ class BarSearcherService {
         let task = URLSession.shared.dataTask(with: urlReqest) { (data, response, error) in
             if error == nil{
                 let json = try? JSONSerialization.jsonObject(with: data!, options: .mutableContainers)
+                print(Thread.current)
                 if let dict = json as? Dictionary<String, AnyObject>{
                     if let result = dict["results"] as? [Dictionary<String,AnyObject>]{
                         for place in result{
@@ -81,9 +82,8 @@ class BarSearcherService {
                                 }
                             }
                             guard let vicinity = place["vicinity"] else { return }
-                            guard let rating = place["rating"] else { return }
                             guard let id = place["place_id"] else { return }
-                            let newBar = Bar(id: id as! String, name: name as! String, latitude: latitude, longitude: longitude, adress: vicinity as! String, reit: rating as! Double)
+                            let newBar = Bar(id: id as! String, name: name as! String, latitude: latitude, longitude: longitude, adress: vicinity as! String)
                             allBar.append(newBar)
                         }
                         complition(nil, allBar)
@@ -92,7 +92,7 @@ class BarSearcherService {
                     }
                 }
             } else {
-                complition(.queryData, nil )
+                complition(.queryData, nil)
             }
         }
         task.resume()
