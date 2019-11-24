@@ -9,8 +9,6 @@
 import UIKit
 import CoreLocation
 import AVFoundation
-//import GoogleMaps
-//import GooglePlaces
 import MapKit
 
 class MainViewController: UIViewController {
@@ -18,10 +16,12 @@ class MainViewController: UIViewController {
     @IBOutlet weak var searchIndicator: UIActivityIndicatorView!
     @IBOutlet weak var compasView: UIImageView!
     @IBOutlet weak var barNameLabel: UILabel!
-    let locationManager = CLLocationManager()
     @IBOutlet weak var adresBarLabel: UILabel!
     @IBOutlet weak var lengthLabel: UILabel!
-    //let compasView = CompasView()
+    
+    private let locationManager = CLLocationManager()
+    private var myBar: Bar?
+    private var bearingOfBar: Double?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,8 +30,8 @@ class MainViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         searchBar()
     }
-
     
+    // MARK: - поиск ближайшего бара
     private func searchBar(){
         
         searchIndicator.startAnimating()
@@ -47,19 +47,18 @@ class MainViewController: UIViewController {
             locationManager.startUpdatingHeading()
         }
         
-        guard let location =  locationManager.location?.coordinate else { return }
+        guard let location = locationManager.location?.coordinate else { return }
         
-        //var buflocation = CLLocationCoordinate2D(latitude: 55.83, longitude: 37.29)
         BarSearcherService.getMyBar(userPosition: location) { (error, resBars, length) in
             if let err = error{
-                print(Thread.current)
                 self.errorController(erro: err.rawValue)
             }else {
                 guard let bar = resBars, let lng = length else { return }
                 DispatchQueue.main.async {
+                    self.myBar = bar
+                    
                     let impact = UIImpactFeedbackGenerator(style: .heavy) // добавил обратную связь
                     impact.impactOccurred()
-                    
                     self.searchIndicator.stopAnimating()
                     self.lengthLabel.text = "До бара \(String(Int(lng))) м."
                     self.barNameLabel.text = bar.name
@@ -70,6 +69,7 @@ class MainViewController: UIViewController {
         
     }
     
+    // MARK: - обработка возможных ошибок при работе
     private func errorController(erro: String){
         let alert = UIAlertController(title: "Внимание", message: erro, preferredStyle: .alert)
         let alertAction = UIAlertAction(title: "OK", style: .destructive, handler: nil)
@@ -80,16 +80,29 @@ class MainViewController: UIViewController {
     
 }
 
-
 extension MainViewController: CLLocationManagerDelegate{
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let coordinate:CLLocationCoordinate2D = manager.location?.coordinate else { return }
-        print("locations = \(coordinate.latitude) \(coordinate.longitude)")
+        if let coordinate:CLLocationCoordinate2D = manager.location?.coordinate {
+            print("locations = \(coordinate.latitude) \(coordinate.longitude)")
+            if let bar = myBar{
+                let distance = BarSearcherService.distanceBetweenPoint(point1: coordinate, point2: bar.location)
+                self.lengthLabel.text = "До бара \(String(Int(distance))) м."
+                
+                bearingOfBar = TranslateCoordinate.getBearingBetweenTwoPoints(bar.location, coordinate)
+            }
+        } else {
+            errorController(erro: "не удалось  получить текущее местоположение")
+        }
     }
     
+    
     func locationManager(_ manager: CLLocationManager, didUpdateHeading heading: CLHeading) {
-        //print(manager.heading)
+        if let bOfBar = bearingOfBar {
+            let north =  -1 * heading.magneticHeading * Double.pi/180
+            let barDirrection = bOfBar * Double.pi/180 + north + 180
+            compasView.transform = CGAffineTransform(rotationAngle: CGFloat(barDirrection))
+        }
     }
     
 }
