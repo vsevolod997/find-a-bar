@@ -25,10 +25,30 @@ class MainViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let recognizer = UITapGestureRecognizer()
+        recognizer.addTarget(self, action: #selector(handlePressGestureGo(_:)))
+        barNameLabel.addGestureRecognizer(recognizer)// добавление жеста нажатия
+        
+        let recognizer2 = UITapGestureRecognizer()
+        recognizer2.addTarget(self, action: #selector(handlePressGestureUpdate(_:)))
+        lengthLabel.addGestureRecognizer(recognizer2)// добавление жеста нажатия
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        searchBar()
+    override func viewDidAppear(_ animated: Bool) {
+        startView()
+    }
+    
+    private func startView(){
+        if Connection.isConnectedToNetwork(){
+            searchBar()
+        } else {
+            searchIndicator.startAnimating()
+            barNameLabel.text = "Проверте подключение к Интернету"
+            adresBarLabel.text = "Возможно, Ваше устройство находиться в авиa - режиме."
+            lengthLabel.text = "Повторить"
+            lengthLabel.isUserInteractionEnabled = true
+        }
     }
     
     // MARK: - поиск ближайшего бара
@@ -37,6 +57,8 @@ class MainViewController: UIViewController {
         searchIndicator.startAnimating()
         barNameLabel.text = "Ожидайте"
         adresBarLabel.text = "поиск ближайшего бара"
+        lengthLabel.text = ""
+        lengthLabel.isUserInteractionEnabled = false
         
         if CLLocationManager.locationServicesEnabled() {
             locationManager.requestAlwaysAuthorization()
@@ -47,26 +69,30 @@ class MainViewController: UIViewController {
             locationManager.startUpdatingHeading()
         }
         
-        guard let location = locationManager.location?.coordinate else { return }
-        
-        BarSearcherService.getMyBar(userPosition: location) { (error, resBars, length) in
-            if let err = error{
-                self.errorController(erro: err.rawValue)
-            }else {
-                guard let bar = resBars, let lng = length else { return }
-                DispatchQueue.main.async {
-                    self.myBar = bar
-                    
-                    let impact = UIImpactFeedbackGenerator(style: .heavy) // добавил обратную связь
-                    impact.impactOccurred()
-                    self.searchIndicator.stopAnimating()
-                    self.lengthLabel.text = "До бара \(String(Int(lng))) м."
-                    self.barNameLabel.text = bar.name
-                    self.adresBarLabel.text =  bar.adress
+        if let location = locationManager.location?.coordinate {
+            
+            BarSearcherService.getMyBar(userPosition: location) { (error, resBars, length) in
+                if let err = error{
+                    self.errorController(erro: err.rawValue)
+                }else {
+                    guard let bar = resBars, let lng = length else { return }
+                    DispatchQueue.main.async {
+                        self.myBar = bar
+                        
+                        let impact = UIImpactFeedbackGenerator(style: .heavy) // добавил обратную связь
+                        impact.impactOccurred()
+                        
+                        self.barNameLabel.isUserInteractionEnabled = true
+                        self.searchIndicator.stopAnimating()
+                        self.lengthLabel.text = "До бара \(String(Int(lng))) м."
+                        self.barNameLabel.text = bar.name
+                        self.adresBarLabel.text =  bar.adress
+                    }
                 }
             }
+        } else {
+            errorController(erro: "Не удалось определить текущее местоположение")
         }
-        
     }
     
     // MARK: - обработка возможных ошибок при работе
@@ -77,14 +103,39 @@ class MainViewController: UIViewController {
         
         present(alert, animated: true, completion: nil)
     }
+    //MARK: - обработка нажатия на название бара
+    @objc func handlePressGestureGo(_ gestureRecognizer: UITapGestureRecognizer) {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.barNameLabel.transform = .init(scaleX: 1.2, y: 1.2)
+        }) { (anim) in
+            let impact = UIImpactFeedbackGenerator(style: .heavy) // добавил обратную связь
+            impact.impactOccurred()
+            
+            self.barNameLabel.transform = .init(scaleX: 1, y: 1)
+            if let bar = self.myBar{
+                if let urlDestination = URL.init(string: "https://www.google.com/maps/search/?api=1&query=\(bar.location.latitude),\(bar.location.longitude)&query_place_id=\(bar.id)")
+                {
+                UIApplication.shared.open(urlDestination, options: [:], completionHandler: nil)
+                }
+            }
+        }
+    }
     
+    //MARK: - обработка нажатия при обновлении данных
+    @objc func handlePressGestureUpdate(_ gestureRecognizer: UITapGestureRecognizer) {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.lengthLabel.transform = .init(scaleX: 1.2, y: 1.2)
+        }) { (anim) in
+            self.lengthLabel.transform = .init(scaleX: 1, y: 1)
+            self.startView()
+        }
+    }
 }
 
 extension MainViewController: CLLocationManagerDelegate{
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let coordinate:CLLocationCoordinate2D = manager.location?.coordinate {
-            print("locations = \(coordinate.latitude) \(coordinate.longitude)")
             if let bar = myBar{
                 let distance = BarSearcherService.distanceBetweenPoint(point1: coordinate, point2: bar.location)
                 self.lengthLabel.text = "До бара \(String(Int(distance))) м."
@@ -92,7 +143,7 @@ extension MainViewController: CLLocationManagerDelegate{
                 bearingOfBar = TranslateCoordinate.getBearingBetweenTwoPoints(bar.location, coordinate)
             }
         } else {
-            errorController(erro: "не удалось  получить текущее местоположение")
+            errorController(erro: "Не удалось определить текущее местоположение")
         }
     }
     

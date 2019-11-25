@@ -22,6 +22,9 @@ class BackgroundView: UIView {
     }
     
     private func setup() {
+    
+        self.alpha = 0.5
+        
         let background = CAGradientLayer()
         background.frame = self.bounds
         background.colors = [UIColor.clear.cgColor, UIColor.systemGray.cgColor]

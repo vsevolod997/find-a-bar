@@ -16,8 +16,8 @@
 		424AAEE12388506F00D07EBE /* Bar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424AAEE02388506F00D07EBE /* Bar.swift */; };
 		424AAEE32388518A00D07EBE /* BarSearcherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424AAEE22388518A00D07EBE /* BarSearcherService.swift */; };
 		424AAEE723895F8300D07EBE /* BackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424AAEE623895F8300D07EBE /* BackgroundView.swift */; };
-		424AAEE92389BB9E00D07EBE /* BarSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424AAEE82389BB9E00D07EBE /* BarSearch.swift */; };
 		424AAEEB238A77F100D07EBE /* TranslateCoordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424AAEEA238A77F100D07EBE /* TranslateCoordinate.swift */; };
+		424AAEF3238BD9BE00D07EBE /* Connestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424AAEF2238BD9BE00D07EBE /* Connestion.swift */; };
 		B8A60C744A389152D19978C6 /* Pods_Find_a_bar.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2F60352C03DE2C00F6092626 /* Pods_Find_a_bar.framework */; };
 /* End PBXBuildFile section */
 
@@ -34,8 +34,8 @@
 		424AAEE02388506F00D07EBE /* Bar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bar.swift; sourceTree = "<group>"; };
 		424AAEE22388518A00D07EBE /* BarSearcherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarSearcherService.swift; sourceTree = "<group>"; };
 		424AAEE623895F8300D07EBE /* BackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundView.swift; sourceTree = "<group>"; };
-		424AAEE82389BB9E00D07EBE /* BarSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarSearch.swift; sourceTree = "<group>"; };
 		424AAEEA238A77F100D07EBE /* TranslateCoordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslateCoordinate.swift; sourceTree = "<group>"; };
+		424AAEF2238BD9BE00D07EBE /* Connestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Connestion.swift; sourceTree = "<group>"; };
 		77B447A12C1424C6FABE19F2 /* Pods-Find a bar.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Find a bar.debug.xcconfig"; path = "Target Support Files/Pods-Find a bar/Pods-Find a bar.debug.xcconfig"; sourceTree = "<group>"; };
 		9C70CF2BC28D35D21ADD6D05 /* Pods-Find a bar.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Find a bar.release.xcconfig"; path = "Target Support Files/Pods-Find a bar/Pods-Find a bar.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -82,7 +82,6 @@
 				4221DB382386828000EEE859 /* Assets.xcassets */,
 				4221DB3A2386828000EEE859 /* LaunchScreen.storyboard */,
 				4221DB3D2386828000EEE859 /* Info.plist */,
-				424AAEE82389BB9E00D07EBE /* BarSearch.swift */,
 			);
 			path = "Find a bar";
 			sourceTree = "<group>";
@@ -92,6 +91,7 @@
 			children = (
 				424AAEEF238B25E300D07EBE /* Coordinate */,
 				424AAEE02388506F00D07EBE /* Bar.swift */,
+				424AAEF2238BD9BE00D07EBE /* Connestion.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -256,10 +256,10 @@
 				4221DB342386827F00EEE859 /* MainViewController.swift in Sources */,
 				424AAEE12388506F00D07EBE /* Bar.swift in Sources */,
 				424AAEEB238A77F100D07EBE /* TranslateCoordinate.swift in Sources */,
+				424AAEF3238BD9BE00D07EBE /* Connestion.swift in Sources */,
 				4221DB302386827F00EEE859 /* AppDelegate.swift in Sources */,
 				424AAEE32388518A00D07EBE /* BarSearcherService.swift in Sources */,
 				4221DB322386827F00EEE859 /* SceneDelegate.swift in Sources */,
-				424AAEE92389BB9E00D07EBE /* BarSearch.swift in Sources */,
 				424AAEE723895F8300D07EBE /* BackgroundView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
